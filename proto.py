@@ -55,9 +55,16 @@ def run(msg):
     return deny("human.ask", msg, "nothing in allow ran")
 
 
-def main():
-    import doors  # noqa: F401 — registers tools.*.
+def _load_doors():
+    import doors  # noqa: F401
+    # python3 proto.py => this file is __main__, doors binds onto module proto
+    proto = sys.modules.get("proto")
+    if proto is not None and proto is not sys.modules[__name__]:
+        REGISTRY.update(getattr(proto, "REGISTRY", {}))
 
+
+def main():
+    _load_doors()
     if len(sys.argv) < 2:
         print("usage: proto.py '{json msg}'", file=sys.stderr)
         sys.exit(2)
